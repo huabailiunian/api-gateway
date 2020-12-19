@@ -22,27 +22,19 @@ import java.util.List;
  * 基于apollo网关配置动态加载
  */
 @Component
-public class RouteConfigChangeListener implements ApplicationEventPublisherAware, EnvironmentAware {
+public class ApolloRouteConfigChangeListener {
 
     private static final String ROUTE_PREFIX = "spring.cloud.gateway.routes";
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private Environment environment;
+    private final Environment environment;
     private final GatewayProperties gatewayProperties;
-    private ApplicationEventPublisher applicationEventPublisher;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
-    public RouteConfigChangeListener(GatewayProperties gatewayProperties) {
-        this.gatewayProperties = gatewayProperties;
-    }
-
-    @Override
-    public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
-        this.applicationEventPublisher = applicationEventPublisher;
-    }
-
-    @Override
-    public void setEnvironment(Environment environment) {
+    public ApolloRouteConfigChangeListener(Environment environment, GatewayProperties gatewayProperties, ApplicationEventPublisher applicationEventPublisher) {
         this.environment = environment;
+        this.gatewayProperties = gatewayProperties;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     @ApolloConfigChangeListener
