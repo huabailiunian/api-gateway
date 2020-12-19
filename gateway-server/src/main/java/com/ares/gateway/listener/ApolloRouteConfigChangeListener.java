@@ -11,8 +11,6 @@ import org.springframework.cloud.gateway.config.GatewayProperties;
 import org.springframework.cloud.gateway.event.RefreshRoutesEvent;
 import org.springframework.cloud.gateway.route.RouteDefinition;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationEventPublisherAware;
-import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
@@ -39,12 +37,15 @@ public class ApolloRouteConfigChangeListener {
 
     @ApolloConfigChangeListener
     public void onChangeEvent(ConfigChangeEvent event) {
-        BindResult<List<RouteDefinition>> bindResult = Binder.get(environment).bind(ROUTE_PREFIX, Bindable.listOf(RouteDefinition.class));
-        if (bindResult.isBound()) {
-            List<RouteDefinition> definitions = bindResult.get();
-            logger.info("update-routes newRouteSize: {}, newRouteConfig: {}", definitions.size(), definitions);
-            gatewayProperties.setRoutes(definitions);
-            applicationEventPublisher.publishEvent(new RefreshRoutesEvent(this));
+        boolean match = event.changedKeys().stream().anyMatch(key -> key.startsWith(ROUTE_PREFIX));
+        if (match) {
+            BindResult<List<RouteDefinition>> bindResult = Binder.get(environment).bind(ROUTE_PREFIX, Bindable.listOf(RouteDefinition.class));
+            if (bindResult.isBound()) {
+                List<RouteDefinition> definitions = bindResult.get();
+                logger.info("update-routes newRouteSize: {}, newRouteConfig: {}", definitions.size(), definitions);
+                gatewayProperties.setRoutes(definitions);
+                applicationEventPublisher.publishEvent(new RefreshRoutesEvent(this));
+            }
         }
     }
 }
